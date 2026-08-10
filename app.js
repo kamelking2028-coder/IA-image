@@ -1,17 +1,12 @@
 document.getElementById("generateBtn").onclick = async () => {
     const prompt = document.getElementById("prompt").value;
 
-    const response = await fetch("https://api.openai.com/v1/images/generations", {
+    const formData = new FormData();
+    formData.append("prompt", prompt);
+
+    const response = await fetch("https://TONSITE/api.php", {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer TA_CLE_API"
-        },
-        body: JSON.stringify({
-            model: "gpt-image-1",
-            prompt: prompt,
-            size: "1024x1024"
-        })
+        body: formData
     });
 
     const data = await response.json();
@@ -19,3 +14,4 @@ document.getElementById("generateBtn").onclick = async () => {
 
     document.getElementById("resultImage").src = url;
 };
+

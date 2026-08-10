@@ -3,6 +3,7 @@ header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
 $prompt = $_POST["prompt"];
+echo "PROMPT_RECU: " . $prompt;
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, "https://api.openai.com/v1/images/generations");

@@ -4,7 +4,8 @@ document.getElementById("generateBtn").onclick = async () => {
     const formData = new FormData();
     formData.append("prompt", prompt);
 
-    const response = await fetch("https://TONSITE/api.php", {
+    const response = await fetch("https://ia-image.site.je/api.php", {
+
         method: "POST",
         body: formData
     });

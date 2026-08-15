@@ -17,10 +17,15 @@ if (!$HF_KEY) {
     exit;
 }
 
-// --- Lire le JSON envoyÈ ---
+// --- Lire le JSON envoy√© ---
+// --- Lire le prompt depuis FormData si pr√©sent ---
+if (isset($_POST["prompt"])) {
+    $prompt = $_POST["prompt"];
+}
+
 $input = json_decode(file_get_contents("php://input"), true);
 $prompt = $input["prompt"] ?? null;
-$model  = $input["model"]  ?? "openjourney"; // valeur par dÈfaut
+$model  = $input["model"]  ?? "openjourney"; // valeur par d√©faut
 
 if (!$prompt) {
     header("Content-Type: application/json");
@@ -28,7 +33,7 @@ if (!$prompt) {
     exit;
 }
 
-// --- Choix du modËle HuggingFace ---
+// --- Choix du mod√®le HuggingFace ---
 switch ($model) {
     case "openjourney":
         // binaire (image brute)
@@ -43,7 +48,7 @@ switch ($model) {
         break;
 
     case "sd15":
-        // binaire (si jamais rÈactivÈ)
+        // binaire (si jamais r√©activ√©)
         $api_url   = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5";
         $response_type = "binary";
         break;
@@ -97,7 +102,7 @@ if ($httpCode !== 200) {
     exit;
 }
 
-// --- Traitement selon le type de rÈponse ---
+// --- Traitement selon le type de r√©ponse ---
 if ($response_type === "binary") {
     // Image brute ? base64 direct
     $image_base64 = base64_encode($result);

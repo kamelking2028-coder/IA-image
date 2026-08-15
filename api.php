@@ -17,15 +17,31 @@ if (!$HF_KEY) {
     exit;
 }
 
-// --- Lire le JSON envoyé ---
-// --- Lire le prompt depuis FormData si présent ---
+/*
+|--------------------------------------------------------------------------
+| Lecture du prompt (FormData OU JSON)
+|--------------------------------------------------------------------------
+*/
+
+$prompt = null;
+$model  = "openjourney"; // valeur par défaut
+
+// 1) FormData (POST classique)
 if (isset($_POST["prompt"])) {
     $prompt = $_POST["prompt"];
 }
 
+// 2) JSON (fetch avec Content-Type: application/json)
 $input = json_decode(file_get_contents("php://input"), true);
-$prompt = $input["prompt"] ?? null;
-$model  = $input["model"]  ?? "openjourney"; // valeur par défaut
+
+if (is_array($input)) {
+    if (!$prompt && isset($input["prompt"])) {
+        $prompt = $input["prompt"];
+    }
+    if (isset($input["model"])) {
+        $model = $input["model"];
+    }
+}
 
 if (!$prompt) {
     header("Content-Type: application/json");
@@ -33,24 +49,26 @@ if (!$prompt) {
     exit;
 }
 
-// --- Choix du modèle HuggingFace ---
+/*
+|--------------------------------------------------------------------------
+| Choix du modèle HuggingFace
+|--------------------------------------------------------------------------
+*/
+
 switch ($model) {
     case "openjourney":
-        // binaire (image brute)
-        $api_url   = "https://api-inference.huggingface.co/models/prompthero/openjourney-v4";
-        $response_type = "binary";
+        $api_url        = "https://api-inference.huggingface.co/models/prompthero/openjourney-v4";
+        $response_type  = "binary";
         break;
 
     case "sd3":
-        // JSON (SD3-medium)
-        $api_url   = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3-medium";
-        $response_type = "json_sd3";
+        $api_url        = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3-medium";
+        $response_type  = "json_sd3";
         break;
 
     case "sd15":
-        // binaire (si jamais réactivé)
-        $api_url   = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5";
-        $response_type = "binary";
+        $api_url        = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5";
+        $response_type  = "binary";
         break;
 
     default:
@@ -64,10 +82,15 @@ $headers = [
     "Content-Type: application/json"
 ];
 
-// ?? HuggingFace attend "inputs", pas "prompt"
+// HuggingFace attend "inputs"
 $data = ["inputs" => $prompt];
 
-// --- cURL ---
+/*
+|--------------------------------------------------------------------------
+| cURL vers HuggingFace
+|--------------------------------------------------------------------------
+*/
+
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $api_url);
 curl_setopt($ch, CURLOPT_POST, true);
@@ -82,12 +105,10 @@ $result   = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 if ($result === false) {
-    $curlError = curl_error($ch);
     header("Content-Type: application/json");
     echo json_encode([
         "error" => "curl_exec failed",
-        "code"  => $httpCode,
-        "curl"  => $curlError
+        "curl"  => curl_error($ch)
     ]);
     exit;
 }
@@ -102,9 +123,13 @@ if ($httpCode !== 200) {
     exit;
 }
 
-// --- Traitement selon le type de réponse ---
+/*
+|--------------------------------------------------------------------------
+| Traitement de la réponse HuggingFace
+|--------------------------------------------------------------------------
+*/
+
 if ($response_type === "binary") {
-    // Image brute ? base64 direct
     $image_base64 = base64_encode($result);
 
     header("Content-Type: application/json");
@@ -116,26 +141,24 @@ if ($response_type === "binary") {
 }
 
 if ($response_type === "json_sd3") {
-    // SD3-medium renvoie du JSON
     $json = json_decode($result, true);
 
     if (!is_array($json)) {
         header("Content-Type: application/json");
         echo json_encode([
-            "error"   => "invalid JSON from SD3",
-            "raw"     => $result
+            "error" => "invalid JSON from SD3",
+            "raw"   => $result
         ]);
         exit;
     }
 
-    // SD3 renvoie souvent un tableau avec un champ "generated_image"
     $image_base64 = $json[0]["generated_image"] ?? null;
 
     if (!$image_base64) {
         header("Content-Type: application/json");
         echo json_encode([
-            "error"   => "no generated_image in SD3 response",
-            "json"    => $json
+            "error" => "no generated_image in SD3 response",
+            "json"  => $json
         ]);
         exit;
     }

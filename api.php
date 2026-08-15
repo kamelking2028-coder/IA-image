@@ -8,11 +8,14 @@ if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
     http_response_code(200);
     exit;
 }
+$config = include("config.php");
+$HF_KEY = $config["HF_KEY"] ?? null;
 
-
-
-
-
+if (!$HF_KEY) {
+    header("Content-Type: application/json");
+    echo json_encode(["error" => "no HF_KEY in config.php"]);
+    exit;
+}
 
 /*
 |--------------------------------------------------------------------------

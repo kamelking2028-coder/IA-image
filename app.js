@@ -13,11 +13,13 @@ document.addEventListener("DOMContentLoaded", () => {
         img.src = "";
 
         try {
-            const response = await fetch("https://ia-image.site.je/api.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ prompt: prompt, model: "openjourney" })
-            });
+               const response = await fetch("https://iaimage.infinityfreeapp.com/api.php", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ prompt: prompt, model: "openjourney" })
+             });   
+
+           
 
             const data = await response.json();
 

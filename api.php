@@ -1,13 +1,20 @@
 <?php
-header("Access-Control-Allow-Origin: https://kamelking2028-coder.github.io");
-/*header("Access-Control-Allow-Origin: *");*/
+// --- CORS ---
+if (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN'] === 'https://kamelking2028-coder.github.io') {
+    header("Access-Control-Allow-Origin: https://kamelking2028-coder.github.io");
+} else {
+    header("Access-Control-Allow-Origin: https://kamelking2028-coder.github.io");
+}
+
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, X-Auth-Token, Origin, Authorization");
 
+// Répondre aux requêtes préflight OPTIONS
 if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
     http_response_code(200);
     exit;
 }
+
 $config = include("config.php");
 $HF_KEY = $config["HF_KEY"] ?? null;
 

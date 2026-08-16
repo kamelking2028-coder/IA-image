@@ -5,7 +5,8 @@ if (isset($_SERVER['HTTP_ORIGIN']) && $_SERVER['HTTP_ORIGIN'] === 'https://kamel
 } else {
     header("Access-Control-Allow-Origin: https://kamelking2028-coder.github.io");
 }
-
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, X-Auth-Token, Origin, Authorization");
 

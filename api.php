@@ -70,9 +70,10 @@ switch ($model) {
         break;
 
     case "sd3":
-        $api_url        = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-3-medium";
-        $response_type  = "json_sd3";
-        break;
+          $api_url        = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2";
+          $response_type  = "binary";
+          break;
+
 
     case "sd15":
         $api_url        = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5";
